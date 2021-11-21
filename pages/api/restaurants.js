@@ -46,19 +46,22 @@ export default async function handler(req,res) {
   const restaurants = db.collection('restaurants')
 
   const params = req.query
+  const {page, 'page-size': pageSize, sort_by, ...restf} = params
 
-  const pg = params.page ?? 1
-  let pgSize = parseInt(params['page-size']) ?? 10
+  const pg = page ?? 1
+  let pgSize = parseInt(pageSize) ?? 10
   if (isNaN(pgSize)) {
     pgSize = 10
   }
-  // const {page, cuisine, ...filters} = params
-  delete params.page
-  delete params['page-size']
 
-  console.log(params)
+  // delete params.page
+  // delete params['page-size']
 
-  const sorts = params['sort_by'] ?? ''
+  console.log(sort_by)
+  console.log(pg)
+
+  // const sorts = params['sort_by'] ?? ''
+  const sorts = sort_by ?? ''
   if (sorts.includes('asc')) {
     var sort = 1
     var par = `${sorts}`.slice(0,-4)
@@ -73,7 +76,7 @@ export default async function handler(req,res) {
     }
   }
   console.log({[par]: sort})
-  delete params['sort_by']
-  let results = await restaurants.find(params).sort({[par]: sort}).limit(pgSize).skip(pgSize*(pg-1)).toArray()
+  // delete params['sort_by']
+  let results = await restaurants.find(restf).sort({[par]: sort}).limit(pgSize).skip(pgSize*(pg-1)).toArray()
   res.status(200).json(results)
 }
